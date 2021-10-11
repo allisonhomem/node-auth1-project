@@ -1,3 +1,5 @@
+const Users = require('../users/users-model.js');
+
 /*
   If the user does not have a session saved in the server
 
@@ -6,8 +8,19 @@
     "message": "You shall not pass!"
   }
 */
-function restricted() {
+function restricted(req, res, next) {
+  try {
 
+    if (true) {
+
+    }
+    else {
+      next();
+    }
+  }
+  catch (err) {
+
+  }
 }
 
 /*
@@ -18,8 +31,21 @@ function restricted() {
     "message": "Username taken"
   }
 */
-function checkUsernameFree() {
+async function checkUsernameFree(req, res, next) {
+  try {
+    const {username} = req.body
+    const alreadyUsername = await Users.findBy({username: username});
 
+    if (alreadyUsername) {
+      res.status(422).json({message: "Username taken"})
+    }
+    else {
+      next();
+    }
+  }
+  catch (err) {
+    next(err);
+  }
 }
 
 /*
@@ -31,7 +57,12 @@ function checkUsernameFree() {
   }
 */
 function checkUsernameExists() {
+  try {
 
+  }
+  catch (err) {
+    
+  }
 }
 
 /*
@@ -43,7 +74,18 @@ function checkUsernameExists() {
   }
 */
 function checkPasswordLength() {
+  try {
 
+  }
+  catch (err) {
+    
+  }
 }
 
 // Don't forget to add these to the `exports` object so they can be required in other modules
+module.exports = {
+  restricted,
+  checkUsernameFree,
+  checkUsernameExists,
+  checkPasswordLength
+}
