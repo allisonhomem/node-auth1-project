@@ -9,17 +9,11 @@ const Users = require('../users/users-model.js');
   }
 */
 function restricted(req, res, next) {
-  try {
-
-    if (true) {
-
-    }
-    else {
-      next();
-    }
+  if (req.session.user) {
+    next();
   }
-  catch (err) {
-
+  else {
+    next({message: "You shall not pass!", status: 401});
   }
 }
 
@@ -33,14 +27,13 @@ function restricted(req, res, next) {
 */
 async function checkUsernameFree(req, res, next) {
   try {
-    const {username} = req.body
-    const alreadyUsername = await Users.findBy({username: username});
+    const alreadyUsername = await Users.findBy({username: req.body.username});
 
-    if (alreadyUsername) {
-      res.status(422).json({message: "Username taken"})
+    if (!alreadyUsername.length) {
+      next();
     }
     else {
-      next();
+      next({message: "Username taken", status: 422});
     }
   }
   catch (err) {
@@ -56,14 +49,23 @@ async function checkUsernameFree(req, res, next) {
     "message": "Invalid credentials"
   }
 */
-function checkUsernameExists() {
+async function checkUsernameExists(req, res, next) {
   try {
+    const validUsername = await Users.findBy({username: req.body.username});
 
+    if (validUsername.length) {
+      req.user = validUsername[0];
+      next();
+    }
+    else {
+      next({message: "Invalid credentials", status: 401});
+    }
   }
   catch (err) {
-    
+    next(err);
   }
 }
+
 
 /*
   If password is missing from req.body, or if it's 3 chars or shorter
@@ -73,14 +75,15 @@ function checkUsernameExists() {
     "message": "Password must be longer than 3 chars"
   }
 */
-function checkPasswordLength() {
-  try {
-
-  }
-  catch (err) {
-    
-  }
+function checkPasswordLength(req, res, next) {
+    if (!req.body.password || req.body.password.length < 3) {
+      next({message: "Password must be longer than 3 chars", status: 422});
+    }
+    else {
+      next();
+    }
 }
+
 
 // Don't forget to add these to the `exports` object so they can be required in other modules
 module.exports = {
